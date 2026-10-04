@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FX Risk Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;700&family=Noto+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F3EA;--fg:#14284B;--card:#FFFFFF;--line:#C9C2B0;--accent:#B94E00;--orange:#F28C28;--navy:#14284B;--on-navy:#FFFFFF;--muted:#4A5568;--bad:#B3261E;--good:#1B6E3C;--hl:#FFF0D9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0E1D38;--fg:#F7F3EA;--card:#17294A;--line:#34496E;--accent:#F5A04D;--navy:#F7F3EA;--on-navy:#14284B;--muted:#C5CCDA;--bad:#FF8A80;--good:#7FD6A0;--hl:#2A3F66}}
+:root[data-theme="dark"]{--bg:#0E1D38;--fg:#F7F3EA;--card:#17294A;--line:#34496E;--accent:#F5A04D;--navy:#F7F3EA;--on-navy:#14284B;--muted:#C5CCDA;--bad:#FF8A80;--good:#7FD6A0;--hl:#2A3F66}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:'Noto Sans Thai',system-ui,sans-serif;font-size:17px;line-height:1.55}
+main{max-width:560px;margin:0 auto;padding:20px 18px 40px}
+.d{font-family:'Prompt','Noto Sans Thai',sans-serif;font-weight:700}
+.eb{font-family:'Prompt',sans-serif;font-weight:500;font-size:13px;letter-spacing:3px;color:var(--accent)}
+h1{margin:4px 0 14px;font-size:30px;line-height:1.2}
+.screen{background:#0E1D38;color:#fff;border:3px solid var(--orange);padding:16px 18px;margin-bottom:14px}
+.screen .lab{font-size:14px;color:#E8B84A;letter-spacing:1px}
+.screen .big{font-family:'Prompt',sans-serif;font-weight:700;font-size:56px;line-height:1.1;letter-spacing:1px}
+.screen .sub{font-size:16px;color:#E4DFD3;margin-top:4px}
+.screen .big.neg{color:#FF8A80}.screen .big.pos{color:#8FE3AE}
+.msg{background:var(--hl);border-left:6px solid var(--orange);padding:10px 14px;margin-bottom:16px;font-size:16px}
+.card{background:var(--card);border:2px solid var(--fg);padding:14px 16px;margin-bottom:14px}
+.f{margin-bottom:14px}.f:last-child{margin-bottom:0}
+.f label{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:16px}
+.f .hint{font-weight:400;font-size:13px;color:var(--muted)}
+input[type=number]{font:inherit;font-family:'Prompt',sans-serif;font-weight:700;font-size:22px;width:100%;padding:8px 12px;margin-top:4px;color:var(--fg);background:var(--bg);border:2px solid var(--line);min-height:48px}
+input[type=number]:focus{outline:none;border-color:var(--orange)}
+input[type=range]{width:100%;accent-color:#F28C28;height:34px;margin:2px 0 0}
+.pre{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pre button{font:inherit;font-size:14px;background:var(--card);color:var(--fg);border:2px solid var(--line);padding:8px 12px;min-height:44px;cursor:pointer}
+.pre button:hover,.pre button:focus-visible{border-color:var(--orange);outline:none}
+.res div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:16px}
+.res div:last-child{border-bottom:0}.res b{font-family:'Prompt',sans-serif;white-space:nowrap}
+.row{display:flex;align-items:center;gap:10px;margin:8px 0}.row .lb{width:104px;font-size:14px;line-height:1.3}
+.row .b{height:28px;transition:width .2s}.row .v{font-family:'Prompt',sans-serif;font-weight:700;font-size:20px;white-space:nowrap}
+h2{font-family:'Prompt',sans-serif;font-size:19px;margin:0 0 8px}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{padding:7px 6px;text-align:left;border-bottom:1px solid var(--line)}
+tr.cur td{background:var(--hl);font-weight:700}
+.note{font-size:13px;color:var(--muted);margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+<div class="eb">GLOBAL CITIZEN INVESTMENT</div>
+<h1 class="d">FX Risk Calculator</h1>
+
+<div class="screen" aria-live="polite">
+<div class="lab">กำไรจริงเป็นเงินบาท</div>
+<div class="big" id="pct">+0.0%</div>
+<div class="sub" id="baht"></div>
+</div>
+<div class="msg" id="msg"></div>
+
+<div class="pre">
+<button type="button" data-p="35000,35,10,32">ตัวอย่างในพิชชิ่ง</button>
+<button type="button" data-p="35000,35,0,32">หุ้นเท่าเดิม บาทแข็ง</button>
+<button type="button" data-p="35000,35,-5,38">หุ้นลง บาทอ่อน</button>
+<button type="button" data-p="35000,35,20,33">หุ้นพุ่ง +20%</button>
+</div>
+
+<div class="card">
+<div class="f"><label for="inv">เงินลงทุน (บาท)</label><input type="number" id="inv" inputmode="decimal" min="1" step="100" value="35000"></div>
+<div class="f"><label for="buy">อัตราตอนซื้อ <span class="hint">บาท / ดอลลาร์</span></label><input type="number" id="buy" inputmode="decimal" min="1" step="0.1" value="35"></div>
+<div class="f"><label for="rs">หุ้นขึ้น / ลง <span class="d" id="rv"></span></label><input type="range" id="rs" min="-30" max="50" step="1" value="10"></div>
+<div class="f"><label for="ss">อัตราตอนขาย <span class="d" id="sv"></span></label><input type="range" id="ss" min="28" max="42" step="0.1" value="32"></div>
+</div>
+
+<div class="card">
+<h2>เทียบ: ผลของหุ้น กับ กำไรจริง</h2>
+<div id="bars"></div>
+</div>
+
+<div class="card res">
+<h2>ขั้นตอนคำนวณ</h2>
+<div><span>ซื้อหุ้นได้</span><b id="o1"></b></div>
+<div><span>มูลค่าหุ้นตอนขาย</span><b id="o2"></b></div>
+<div><span>แลกกลับเป็นบาท</span><b id="o3"></b></div>
+<div><span>กำไร / ขาดทุน</span><b id="o4"></b></div>
+<div><span>อัตราขายที่เท่าทุน</span><b id="o5"></b></div>
+</div>
+
+<div class="card">
+<h2>ถ้าขายตอนอัตราอื่น ๆ</h2>
+<table><thead><tr><th>บาท/ดอลลาร์</th><th>เงินที่ได้ (บาท)</th><th>กำไรจริง</th></tr></thead><tbody id="tb"></tbody></table>
+</div>
+
+<p class="note">เพื่อการศึกษาเท่านั้น ไม่ใช่คำแนะนำการลงทุน การลงทุนมีความเสี่ยง ผู้ลงทุนควรศึกษาข้อมูลก่อนตัดสินใจ ไม่รวมค่าธรรมเนียม ภาษี และส่วนต่างอัตราซื้อขายเงินตราต่างประเทศ</p>
+</main>
+
+<script>
+function $(i){return document.getElementById(i)}
+function n(v){var x=parseFloat(v);return isFinite(x)?x:0}
+function fmt(x,d){return x.toLocaleString("en-US",{minimumFractionDigits:d||0,maximumFractionDigits:d||0})}
+function pc(x){return (x>=0?"+":"")+x.toFixed(1)+"%"}
+function calc(inv,buy,r,sell){var usd=inv/buy,val=usd*(1+r/100),back=val*sell;return{usd:usd,val:val,back:back,profit:back-inv,pct:(back/inv-1)*100}}
+function render(){
+ var inv=n($("inv").value),buy=n($("buy").value),r=n($("rs").value),sell=n($("ss").value);
+ $("rv").textContent=(r>=0?"+":"")+r+"%";$("sv").textContent=sell.toFixed(1)+" บาท";
+ if(inv<=0||buy<=0){$("pct").textContent="-";$("baht").textContent="กรอกเงินลงทุนและอัตราตอนซื้อ";return}
+ var c=calc(inv,buy,r,sell);
+ var p=$("pct");p.textContent=pc(c.pct);p.className="big "+(c.pct<0?"neg":"pos");
+ $("baht").textContent=(c.profit>=0?"กำไร ":"ขาดทุน ")+fmt(Math.abs(c.profit))+" บาท จากเงินลงทุน "+fmt(inv)+" บาท";
+ var gap=c.pct-r,m;
+ if(Math.abs(gap)<1)m="ค่าเงินแทบไม่เปลี่ยนผลลัพธ์ ในกรณีนี้";
+ else m="หุ้น "+((r>=0?"+":"")+r)+"% แต่กำไรจริง "+pc(c.pct)+" ค่าเงิน"+(gap<0?"กินกำไรไป ":"ช่วยเพิ่มให้ ")+Math.abs(gap).toFixed(1)+" จุด";
+ $("msg").textContent=m;
+ var mx=Math.max(Math.abs(r),Math.abs(c.pct),1);
+ function bar(l,v){var w=Math.max(3,Math.abs(v)/mx*100);return '<div class="row"><div class="lb">'+l+'</div><div style="flex:1"><div class="b" style="width:'+w+'%;background:'+(v<0?'var(--bad)':'var(--orange)')+'"></div></div><div class="v" style="color:'+(v<0?'var(--bad)':'var(--accent)')+'">'+pc(v)+'</div></div>'}
+ $("bars").innerHTML=bar("ผลของหุ้น",r)+bar("กำไรจริง (บาท)",c.pct);
+ $("o1").textContent=fmt(c.usd,2)+" USD";$("o2").textContent=fmt(c.val,2)+" USD";$("o3").textContent=fmt(c.back)+" บาท";
+ $("o4").textContent=(c.profit>=0?"+":"-")+fmt(Math.abs(c.profit))+" บาท";
+ $("o5").textContent=(1+r/100)>0?(buy/(1+r/100)).toFixed(2)+" บาท":"-";
+ var rows="",set=[30,32,34,35,36,38,40];
+ set.forEach(function(s){var q=calc(inv,buy,r,s);rows+='<tr'+(Math.abs(s-sell)<0.05?' class="cur"':'')+'><td>'+s+'</td><td>'+fmt(q.back)+'</td><td style="color:'+(q.pct<0?'var(--bad)':'var(--good)')+'">'+pc(q.pct)+'</td></tr>'});
+ $("tb").innerHTML=rows;
+}
+["inv","buy","rs","ss"].forEach(function(i){$(i).addEventListener("input",render)});
+document.querySelectorAll(".pre button").forEach(function(b){b.addEventListener("click",function(){
+ var a=b.getAttribute("data-p").split(",");$("inv").value=a[0];$("buy").value=a[1];$("rs").value=a[2];$("ss").value=a[3];render()})});
+render();
+</script>
+</body>
+</html>
